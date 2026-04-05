@@ -78,30 +78,23 @@
                                     <div x-show="moduleOpen" x-collapse class="space-y-1">
                                         @foreach($module->materials as $lesson)
                                             @php
-                                                // We use the variable passed from the controller
-                                                $isDone = in_array((int) $lesson->id, $completedIds ?? []);
-                                                $isActive = isset($currentLesson) && (int)$currentLesson->id == (int)$lesson->id;
+                                                $done = in_array((int) $lesson->id, $completedIds ?? []);
+                                                $active = isset($currentLesson) && (int)$currentLesson->id == (int)$lesson->id;
                                             @endphp
 
-                                            <a href="{{ route('student.lesson.show', ['course' => $course->slug, 'material' => $lesson->id]) }}" 
-                                            class="group flex items-center gap-3 py-2 px-4 text-sm rounded-lg transition-all 
-                                            {{ $isActive ? 'bg-orange-600 text-white font-bold shadow-md' : 'text-gray-600 hover:bg-gray-200' }}">
-                                                
+                                            <a href="..." class="{{ $active ? 'bg-orange-600 text-white' : '' }}">
                                                 <div class="shrink-0">
-                                                    @if($isDone)
-                                                        {{-- THE GREEN MARK --}}
-                                                        <div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center shadow-sm border border-green-600">
+                                                    @if($done)
+                                                        <div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center border border-green-600">
                                                             <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path>
                                                             </svg>
                                                         </div>
                                                     @else
-                                                        {{-- THE EMPTY CIRCLE --}}
-                                                        <div class="w-4 h-4 border-2 {{ $isActive ? 'border-white/50' : 'border-gray-300' }} rounded-full group-hover:border-orange-400 transition-colors"></div>
+                                                        <div class="w-4 h-4 border-2 {{ $active ? 'border-white/50' : 'border-gray-300' }} rounded-full"></div>
                                                     @endif
                                                 </div>
-
-                                                <span class="truncate">{{ $lesson->title }}</span>
+                                                <span>{{ $lesson->title }}</span>
                                             </a>
                                         @endforeach
                                     </div>

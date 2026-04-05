@@ -63,23 +63,26 @@
                                 <div x-show="open" x-collapse class="grid gap-3">
                                     @foreach($module->materials as $lesson)
                                         @php
+                                            // Simple check: is this lesson ID in our completed list?
                                             $isDone = in_array((int) $lesson->id, $completedIds ?? []);
                                         @endphp
 
-                                        {{-- Change your status circle code to this --}}
-                                        <div class="shrink-0">
-                                            @if($isDone)
-                                                <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-sm border border-green-600">
-                                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                </div>
-                                            @else
-                                                <div class="w-6 h-6 border-2 border-gray-200 rounded-full"></div>
-                                            @endif
+                                        <div class="flex items-center gap-4">
+                                            <div class="shrink-0">
+                                                @if($isDone)
+                                                    {{-- GREEN CHECK --}}
+                                                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border border-green-600 shadow-sm">
+                                                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                    </div>
+                                                @else
+                                                    {{-- EMPTY CIRCLE --}}
+                                                    <div class="w-6 h-6 border-2 border-gray-200 rounded-full"></div>
+                                                @endif
+                                            </div>
+                                            <span class="font-bold {{ $isDone ? 'text-gray-400' : 'text-gray-800' }}">{{ $lesson->title }}</span>
                                         </div>
-                                        
-                                        {{-- Rest of your title/button code --}}
                                     @endforeach
                                 </div>
                             </div>

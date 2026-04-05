@@ -14,14 +14,15 @@ class CourseController extends Controller
      */
     public function curriculum(Course $course)
     {
+        // Fetch all completed material IDs for this user as a simple array of integers
         $completedIds = \App\Models\CourseProgress::where('user_id', auth()->id())
             ->pluck('course_material_id')
-            ->map(fn($id) => (int) $id) // Force to integers
+            ->map(fn($id) => (int) $id)
             ->toArray();
 
         return view('student.courses.curriculum', compact('course', 'completedIds'));
     }
-    
+
     public function show(Course $course, $materialId)
     {
         $currentLesson = \App\Models\CourseMaterial::findOrFail($materialId);
