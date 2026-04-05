@@ -59,4 +59,17 @@ class CourseMaterial extends Model
             }
         });
     }
+
+    /**
+     * Check if the current user has completed this lesson
+     */
+    public function isCompletedBy($user): bool
+    {
+        if (!$user) return false;
+
+        // We use whereRaw or explicit integers to avoid any "string vs int" mismatch
+        return \App\Models\CourseProgress::where('user_id', (int) $user->id)
+            ->where('course_material_id', (int) $this->id)
+            ->exists();
+    }
 }

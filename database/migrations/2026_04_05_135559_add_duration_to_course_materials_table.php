@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->string('college_email')->unique()->nullable();
-            $table->text('physical_address')->nullable();
+        Schema::table('course_materials', function (Blueprint $table) {
+            $table->integer('duration')->nullable()->default(5)->after('title'); // Duration in minutes
         });
     }
 
@@ -22,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('students', function (Blueprint $table) {
+        Schema::table('course_materials', function (Blueprint $table) {
             //
         });
     }

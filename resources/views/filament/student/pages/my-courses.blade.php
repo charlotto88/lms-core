@@ -1,72 +1,96 @@
 <x-filament-panels::page>
-    <div class="space-y-8">
-        {{-- Custom Dashboard Header --}}
-        <header class="flex flex-col gap-2">
-            <h1 class="text-3xl font-black tracking-tight text-gray-900 dark:text-white">
-                My Enrolled Courses
-            </h1>
-            <p class="text-gray-500 dark:text-gray-400">
-                Welcome back, {{ auth()->user()->name }}. Continue your learning journey.
-            </p>
-        </header>
+    <div style="margin: -2rem -2rem 0 -2rem; background-color: #f7f9fa; min-height: 100vh;">
+        
+        {{-- DARK UDEMY HERO HEADER --}}
+        <div style="background-color: #2d2f31; color: white; padding: 3.5rem 4rem; margin-bottom: 2.5rem;">
+            <div style="max-width: 1340px; margin: 0 auto;">
+                <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; font-family: 'SuisseWorks', Georgia, Times, serif;">My learning</h1>
+                
+                {{-- Navigation Tabs --}}
+                <div style="display: flex; gap: 1.5rem; margin-top: 2.5rem; font-size: 0.95rem; font-weight: 700;">
+                    <div style="padding-bottom: 0.5rem; border-bottom: 5px solid white; cursor: pointer; color: white;">All courses</div>
+                    <div style="padding-bottom: 0.5rem; color: #b1b3b5; cursor: pointer; border-bottom: 5px solid transparent;">My Lists</div>
+                    <div style="padding-bottom: 0.5rem; color: #b1b3b5; cursor: pointer; border-bottom: 5px solid transparent;">Wishlist</div>
+                    <div style="padding-bottom: 0.5rem; color: #b1b3b5; cursor: pointer; border-bottom: 5px solid transparent;">Archived</div>
+                </div>
+            </div>
+        </div>
 
-        {{-- Course Grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{-- COURSE GRID --}}
+        <div style="max-width: 1340px; margin: 0 auto; padding: 0 4rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2.5rem 1.5rem;">
             @forelse($this->courses as $course)
-                <div class="flex flex-col bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
+                <div style="display: flex; flex-direction: column; background: white; border: 1px solid #d1d7dc; transition: box-shadow 0.2s;" class="group hover-shadow">
                     
-                    {{-- Course Hero/Branding Area --}}
-                    <div class="h-32 bg-gradient-to-br from-orange-500 to-orange-600 p-6 flex items-end relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-4 opacity-10">
-                            <svg class="w-20 h-20 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 7l11 5 11-5-11-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                        </div>
-                        <span class="text-white/30 font-black text-4xl uppercase tracking-tighter select-none">
-                            {{ substr($course->course_code, 0, 3) }}
-                        </span>
+                    {{-- Thumbnail Area --}}
+                    <div style="aspect-ratio: 16/9; width: 100%; background-color: #f0f2f5; overflow: hidden; position: relative;">
+                        @if($course->banner_image)
+                            <img src="{{ asset('storage/' . $course->banner_image) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        @else
+                            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e3e7ed;">
+                                <span style="font-weight: 900; font-size: 1.5rem; color: #adb5bd;">{{ substr($course->course_code, 0, 3) }}</span>
+                                <span style="font-size: 0.6rem; font-weight: 800; color: #adb5bd; margin-top: 4px;">{{ $course->course_code }}</span>
+                            </div>
+                        @endif
+                        
+                        {{-- Link overlay for the image only --}}
+                        <a href="{{ route('student.course.curriculum', $course->slug) }}" style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;" class="group-hover:opacity-100">
+                            <div style="background: white; border-radius: 50%; padding: 0.8rem;">
+                                <svg style="width: 1.5rem; height: 1.5rem; color: black;" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                            </div>
+                        </a>
                     </div>
 
-                    <div class="p-6 flex-1 flex flex-col">
-                        <div class="flex-1 mb-6">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="px-2 py-0.5 bg-orange-100 text-orange-600 text-[10px] font-black uppercase rounded-md">
-                                    {{ $course->course_code }}
+                    {{-- Card Content --}}
+                    {{-- Inside your @forelse loop --}}
+                    <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column;">
+                        <h3 style="font-weight: 700; font-size: 1rem; color: #2d2f31; margin-bottom: 4px;">
+                            {{ $course->title }}
+                        </h3>
+                        
+                        {{-- Total Time Display --}}
+                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 12px;">
+                            <svg style="width: 12px; height: 12px; color: #6a6f73;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span style="font-size: 0.75rem; color: #6a6f73;">
+                                {{ $course->chapters->flatMap->modules->flatMap->materials->sum('duration') }} min total
+                            </span>
+                        </div>
+                        
+                        {{-- Progress Bar --}}
+                        <div style="margin-bottom: 1rem;">
+                            <div style="width: 100%; height: 2px; background: #d1d7dc;">
+                                {{-- DYNAMIC WIDTH --}}
+                                <div style="width: {{ $course->progress_percent }}%; height: 100%; background: #5624d0; transition: width 0.5s ease-in-out;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #2d2f31;">
+                                    {{ $course->progress_percent }}% complete
                                 </span>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-orange-600 transition-colors leading-tight">
-                                {{ $course->title }}
-                            </h3>
-                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                                {{ $course->description ?? 'Start mastering this course today.' }}
-                            </p>
                         </div>
 
-                        {{-- Footer with Progress & Action --}}
-                        <div class="pt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                            <div class="flex flex-col">
-                                <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Progress</span>
-                                <span class="text-sm font-bold text-gray-700 dark:text-gray-300">0% Complete</span>
-                            </div>
-
-                            {{-- THE CRITICAL LINK: Points to the Curriculum Map --}}
-                            <a href="{{ route('student.course.curriculum', ['course' => $course->slug]) }}" 
-                               class="inline-flex items-center justify-center px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-orange-100 dark:shadow-none transition-all active:scale-95 group-hover:-translate-y-1">
-                                Start Learning
-                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                </svg>
-                            </a>
-                        </div>
+                        <a href="{{ route('student.course.curriculum', $course->slug) }}" 
+                        style="display: block; width: 100%; text-align: center; background-color: #a435f0; color: white; padding: 10px 0; font-weight: 700; font-size: 0.9rem; text-decoration: none; border-radius: 4px;">
+                            Begin leer
+                        </a>
                     </div>
                 </div>
             @empty
-                <div class="col-span-full py-20 text-center bg-gray-50 dark:bg-gray-800/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-                    <div class="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">No Enrolled Courses</h3>
-                    <p class="text-gray-500">You are not currently enrolled in any courses.</p>
+                <div style="grid-column: 1 / -1; padding: 4rem; text-align: center; background: white; border: 1px solid #d1d7dc;">
+                    <p style="color: #6a6f73;">Geen kursusse gevind nie.</p>
                 </div>
             @endforelse
         </div>
+
+        <style>
+            .hover-shadow:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+            .group:hover .group-hover\:opacity-100 { opacity: 1 !important; }
+        </style>
     </div>
+
+    <style>
+        /* This handles the hover states that Inline styles can't do */
+        .udemy-card:hover { opacity: 0.9; }
+        .group:hover .group-hover\:opacity-100 { opacity: 1 !important; }
+        .group:hover .group-hover\:text-\[\#5624d0\] { color: #5624d0 !important; }
+    </style>
 </x-filament-panels::page>

@@ -11,19 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->string('profile_photo')->nullable();
-            $table->string('phone')->nullable();
+        Schema::table('courses', function (Blueprint $table) {
+            // Adding the missing column Filament is trying to update
+            $table->boolean('is_visible')->default(true)->after('banner_image');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('students', function (Blueprint $table) {
-            //
+        Schema::table('courses', function (Blueprint $table) {
+            $table->dropColumn('is_visible');
         });
     }
 };

@@ -9,15 +9,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Builder;
-use Filament\Forms\Components\Builder\Block;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Grid;
 use Illuminate\Support\Str;
 
 class CourseResource extends Resource
@@ -25,132 +16,164 @@ class CourseResource extends Resource
     protected static ?string $model = Course::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
-    protected static ?string $navigationGroup = 'Academic Management';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                // TOP BAR: Course Identity (Modern, Slim)
-                Section::make()
+                Forms\Components\Section::make('Course Details')
                     ->schema([
-                        Grid::make(3)->schema([
-                            TextInput::make('title')
-                                ->label('Course Name')
-                                ->required()
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
-                            TextInput::make('course_code')->label('Course Code')->required(),
-                            Select::make('category_id')
-                                ->label('Department')
-                                ->relationship('category', 'name')
-                                ->required(),
-                        ]),
-                    ])->compact(),
-
-                // THE CURRICULUM CANVAS
-                Section::make('Curriculum Builder')
-                    ->description('Organize your structure and build lesson content using blocks.')
-                    ->schema([
-                        Repeater::make('chapters')
-                            ->relationship()
-                            ->label('Chapter')
-                            ->addActionLabel('Add New Chapter')
-                            ->itemLabel(fn ($state) => $state['title'] ?? 'Untitled Chapter')
-                            ->collapsible()
-                            ->inset() // Flattens the UI, removes "Box-in-Box" look
+                        Forms\Components\Grid::make(2)
                             ->schema([
-                                TextInput::make('title')->placeholder('Chapter Title (e.g. Chapter 1)')->required(),
+                                Forms\Components\TextInput::make('title')
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => 
+                                        $operation === 'create' ? $set('slug', Str::slug($state)) : null),
 
-                                // MODULES
-                                Repeater::make('modules')
-                                    ->relationship()
-                                    ->label('Modules')
-                                    ->addActionLabel('Add Module')
-                                    ->itemLabel(fn ($state) => $state['title'] ?? 'Untitled Module')
-                                    ->collapsible()
-                                    ->collapsed()
-                                    ->inset()
-                                    ->schema([
-                                        TextInput::make('title')->placeholder('Module Title (e.g. Module 1.1)')->required(),
+                                Forms\Components\TextInput::make('slug')
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->required()
+                                    ->unique(Course::class, 'slug', ignoreRecord: true),
 
-                                        // LESSONS: The Block Builder Canvas
-                                        Repeater::make('materials')
-                                            ->relationship()
-                                            ->label('Lessons')
-                                            ->addActionLabel('Add Lesson')
-                                            ->itemLabel(fn ($state) => $state['title'] ?? 'Untitled Lesson')
-                                            ->collapsible()
-                                            ->collapsed()
-                                            ->schema([
-                                                TextInput::make('title')
-                                                    ->label('Lesson Name')
-                                                    ->required()
-                                                    ->columnSpanFull(),
+                                Forms\Components\TextInput::make('course_code')
+                                    ->label('Course Code (e.g. GVT01)')
+                                    ->required(),
 
-                                                // THE BLOCK BUILDER: Quick Actions for Content
-                                                Builder::make('content_blocks') // Ensure this is a JSON column in your DB
-                                                    ->label('Lesson Designer')
-                                                    ->blocks([
-                                                        // Block 1: Text
-                                                        Block::make('text')
-                                                            ->label('Massive Text / Paragraphs')
-                                                            ->icon('heroicon-m-document-text')
-                                                            ->schema([
-                                                                RichEditor::make('text_content')
-                                                                    ->label('Body')
-                                                                    ->required()
-                                                                    ->fileAttachmentsDirectory('lessons'),
-                                                            ]),
+                                Forms\Components\Toggle::make('is_visible')
+                                    ->label('Visible to Students')
+                                    ->default(true),
+                            ]),
 
-                                                        // Block 2: Video
-                                                        Block::make('video')
-                                                            ->label('Video Player')
-                                                            ->icon('heroicon-m-play-circle')
-                                                            ->schema([
-                                                                TextInput::make('url')
-                                                                    ->label('Video Link (YouTube/Vimeo)')
-                                                                    ->placeholder('https://...')
-                                                                    ->required(),
-                                                            ]),
+                        Forms\Components\Textarea::make('description')
+                            ->rows(3)
+                            ->columnSpanFull(),
 
-                                                        // Block 3: Files
-                                                        Block::make('file')
-                                                            ->label('File Download')
-                                                            ->icon('heroicon-m-paper-clip')
-                                                            ->schema([
-                                                                FileUpload::make('file_path')
-                                                                    ->label('Attachment')
-                                                                    ->directory('course-materials')
-                                                                    ->required(),
-                                                            ]),
-                                                    ])
-                                                    ->addActionLabel('Add Content Piece')
-                                                    ->blockNumbers(false)
-                                                    ->collapsible()
-                                                    ->collapsed()
-                                                    ->columnSpanFull(),
-                                            ])
-                                            ->orderColumn('sort_order'),
-                                    ])
-                                    ->orderColumn('sort_order'),
-                            ])
-                            ->orderColumn('sort_order'),
+                        Forms\Components\FileUpload::make('banner_image')
+                            ->image()
+                            ->directory('course-banners')
+                            ->columnSpanFull(),
                     ]),
-            ])->columns(1);
+
+                Forms\Components\Section::make('Curriculum Builder')
+                    ->description('Organize your course into Chapters, Modules, and Lessons.')
+                    ->schema([
+                        Forms\Components\Repeater::make('chapters')
+                            ->relationship('chapters')
+                            ->orderColumn('sort_order')
+                            ->schema([
+                                Forms\Components\TextInput::make('title')
+                                    ->label('Chapter Name (e.g. Hoofstuk 1)')
+                                    ->required(),
+
+                                Forms\Components\Repeater::make('modules')
+                                    ->label('Modules / Units')
+                                    ->relationship('modules')
+                                    ->orderColumn('sort_order')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('title')
+                                            ->label('Module Name (e.g. Eenheid 1)')
+                                            ->required(),
+
+                                        Forms\Components\Repeater::make('materials')
+                                            ->label('Lessons')
+                                            ->relationship('materials')
+                                            ->orderColumn('sort_order')
+                                            ->columns(3) // Layout: 2/3 Title, 1/3 Duration
+                                            ->schema([
+                                                Forms\Components\TextInput::make('title')
+                                                    ->label('Lesson Title')
+                                                    ->required()
+                                                    ->columnSpan(2)
+                                                    ->live(onBlur: true)
+                                                    ->afterStateUpdated(fn ($state, Forms\Set $set) => $set('slug', Str::slug($state))),
+
+                                                Forms\Components\TextInput::make('duration')
+                                                    ->label('Duration')
+                                                    ->numeric()
+                                                    ->suffix('min')
+                                                    ->default(5)
+                                                    ->required()
+                                                    ->columnSpan(1),
+
+                                                Forms\Components\Hidden::make('slug'),
+
+                                                Forms\Components\Builder::make('content_blocks')
+                                                    ->label('Lesson Content')
+                                                    ->columnSpanFull()
+                                                    ->blocks([
+                                                        Forms\Components\Builder\Block::make('text')
+                                                            ->schema([
+                                                                Forms\Components\RichEditor::make('text_content')
+                                                                    ->label('Content')
+                                                                    ->required(),
+                                                            ]),
+                                                        Forms\Components\Builder\Block::make('video')
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('url')
+                                                                    ->label('Video URL (YouTube/Vimeo)')
+                                                                    ->required(),
+                                                            ]),
+                                                        Forms\Components\Builder\Block::make('image')
+                                                            ->schema([
+                                                                Forms\Components\FileUpload::make('image_path')
+                                                                    ->image()
+                                                                    ->required(),
+                                                                Forms\Components\TextInput::make('alt_text'),
+                                                            ]),
+                                                    ]),
+                                            ])
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null),
+                                    ])
+                                    ->collapsible()
+                                    ->itemLabel(fn (array $state): ?string => $state['title'] ?? null),
+                            ])
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('course_code')->label('Code')->weight('bold'),
-                Tables\Columns\TextColumn::make('title')->searchable(),
-                Tables\Columns\TextColumn::make('category.name')->label('Dept')->badge(),
+                Tables\Columns\ImageColumn::make('banner_image')
+                    ->circular(),
+                Tables\Columns\TextColumn::make('course_code')
+                    ->fontFamily('mono')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('title')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('is_visible')
+                    ->boolean()
+                    ->label('Visible'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
     }
 
     public static function getPages(): array

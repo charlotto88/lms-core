@@ -12,17 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('course_materials', function (Blueprint $table) {
-            $table->json('content_blocks')->nullable();
+            // This adds the missing slug column for your lessons
+            $table->string('slug')->nullable()->after('title');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('course_materials', function (Blueprint $table) {
-            //
+            $table->dropColumn('slug');
         });
     }
 };
